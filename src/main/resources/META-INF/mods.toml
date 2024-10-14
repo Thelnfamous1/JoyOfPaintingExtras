@@ -61,3 +61,10 @@ description='''${mod_description}'''
     versionRange="${minecraft_version_range}"
     ordering="NONE"
     side="BOTH"
+# Here's another dependency
+[[dependencies.${mod_id}]]
+modId="xercapaint"
+mandatory=true
+versionRange="${jop_version_range}"
+ordering="NONE"
+side="BOTH"

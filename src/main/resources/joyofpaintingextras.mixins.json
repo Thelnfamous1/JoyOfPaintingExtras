@@ -1,0 +1,25 @@
+{
+  "required": true,
+  "package": "me.Thelnfamous1.joyofpaintingextras.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "joyofpaintingextras.refmap.json",
+  "mixins": [
+    "CanvasMiniUpdatePacketMixin",
+    "CanvasTypeExtender",
+    "CanvasUpdatePacketMixin",
+    "CommandImportMixin",
+    "EntityCanvasMixin",
+    "ItemCanvasAccessor",
+    "ItemCanvasMixin",
+    "ItemMixin"
+  ],
+  "client": [
+    "BasePaletteAccessor",
+    "BasePaletteMixin",
+    "CanvasItemRendererMixin",
+    "EaselCanvasLayerMixin",
+    "GuiCanvasEditMixin",
+    "GuiCanvasViewMixin"
+  ],
+  "minVersion": "0.8.5"
+}

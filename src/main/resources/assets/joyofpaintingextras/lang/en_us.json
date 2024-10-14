@@ -1,0 +1,6 @@
+{
+  "item.joyofpaintingextras.item_canvas_custom": "Custom Canvas",
+  "canvas.custom_dimensions": "Dimensions: %dx%d",
+  "commands.joyofpaintingextras.resize.success": "Resized %s to %dx%d",
+  "commands.joyofpaintingextras.resize.not_holding_custom_canvas": "You must be holding a Custom Canvas"
+}
