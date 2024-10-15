@@ -31,7 +31,7 @@ public abstract class CanvasUpdatePacketMixin implements CanvasDimensionsHolder 
 
     @Inject(method = "<init>([IZLjava/lang/String;Ljava/lang/String;ILxerca/xercapaint/common/entity/EntityEasel;[Lxerca/xercapaint/common/PaletteUtil$CustomColor;Lxerca/xercapaint/common/CanvasType;)V", at = @At("TAIL"))
     private void post_init(int[] pixels, boolean signed, String title, String name, int version, EntityEasel easel, PaletteUtil.CustomColor[] paletteColors, CanvasType canvasType, CallbackInfo ci){
-        if(canvasType == CustomCanvasType.CUSTOM){
+        if(canvasType == CustomCanvasType.CUSTOM && easel != null){
             ItemStack stack = easel.getItem();
             int customWidth = CustomCanvasType.getCustomWidth(stack);
             int customHeight = CustomCanvasType.getCustomHeight(stack);
@@ -69,7 +69,7 @@ public abstract class CanvasUpdatePacketMixin implements CanvasDimensionsHolder 
 
     @Inject(method = "encode", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/FriendlyByteBuf;writeVarIntArray([I)Lnet/minecraft/network/FriendlyByteBuf;"))
     private static void post_encode(CanvasUpdatePacket pkt, FriendlyByteBuf buf, CallbackInfo ci){
-        if(((CanvasDimensionsHolder)pkt).joyofpixelsextras$getCanvasType() == CustomCanvasType.CUSTOM){
+        if(((CanvasDimensionsHolder)pkt).joyofpixelsextras$getCanvasType() == CustomCanvasType.CUSTOM && pkt.getEaselId() > -1){
             buf.writeInt(((CanvasDimensionsHolder)pkt).joyofpixelsextras$getCustomWidth());
             buf.writeInt(((CanvasDimensionsHolder)pkt).joyofpixelsextras$getCustomHeight());
         }
@@ -77,7 +77,7 @@ public abstract class CanvasUpdatePacketMixin implements CanvasDimensionsHolder 
 
     @ModifyVariable(method = "decode", at = @At(value = "STORE", ordinal = 1))
     private static int modify_pixelsLength_decode(int original, FriendlyByteBuf buf, @Local(ordinal = 0) CanvasUpdatePacket result){
-        if(((CanvasDimensionsHolder)result).joyofpixelsextras$getCanvasType() == CustomCanvasType.CUSTOM){
+        if(((CanvasDimensionsHolder)result).joyofpixelsextras$getCanvasType() == CustomCanvasType.CUSTOM && result.getEaselId() > -1){
             int customWidth = buf.readInt();
             int customHeight = buf.readInt();
             ((CanvasDimensionsHolder)result).joyofpixelsextras$setCustomWidth(customWidth);
