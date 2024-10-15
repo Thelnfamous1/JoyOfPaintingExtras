@@ -4,9 +4,7 @@
   "compatibilityLevel": "JAVA_17",
   "refmap": "joyofpaintingextras.refmap.json",
   "mixins": [
-    "CanvasMiniUpdatePacketMixin",
     "CanvasTypeExtender",
-    "CanvasUpdatePacketMixin",
     "CommandImportMixin",
     "EntityCanvasMixin",
     "ItemCanvasAccessor",

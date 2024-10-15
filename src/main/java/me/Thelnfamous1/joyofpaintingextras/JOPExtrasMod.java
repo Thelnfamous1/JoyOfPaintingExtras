@@ -5,6 +5,10 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.logging.LogUtils;
 import me.Thelnfamous1.joyofpaintingextras.mixin.ItemCanvasAccessor;
+import me.Thelnfamous1.joyofpaintingextras.network.CustomCanvasMiniUpdatePacket;
+import me.Thelnfamous1.joyofpaintingextras.network.CustomCanvasMiniUpdatePacketHandler;
+import me.Thelnfamous1.joyofpaintingextras.network.CustomCanvasUpdatePacket;
+import me.Thelnfamous1.joyofpaintingextras.network.CustomCanvasUpdatePacketHandler;
 import net.minecraft.Util;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
@@ -21,6 +25,8 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.network.NetworkRegistry;
+import net.minecraftforge.network.simple.SimpleChannel;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
@@ -40,39 +46,49 @@ public class JOPExtrasMod {
     private static final SimpleCommandExceptionType NOT_HOLDING_CUSTOM_CANVAS = new SimpleCommandExceptionType(Component.translatable(NOT_HOLDING_CUSTOM_CANVAS_KEY));
     public static final String RESIZE_SUCCESS = Util.makeDescriptionId("commands", new ResourceLocation(MODID, "resize/success"));
 
+    private static final String PROTOCOL_VERSION = Integer.toString(1);
+    public static final SimpleChannel NETWORK_HANDLER = NetworkRegistry.ChannelBuilder.named(new ResourceLocation(MODID, "main_channel"))
+            .clientAcceptedVersions(PROTOCOL_VERSION::equals)
+            .serverAcceptedVersions(PROTOCOL_VERSION::equals)
+            .networkProtocolVersion(() -> PROTOCOL_VERSION)
+            .simpleChannel();
+    private static int packetId;
+
     public JOPExtrasMod() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         ITEMS.register(modEventBus);
-        MinecraftForge.EVENT_BUS.addListener((RegisterCommandsEvent event) -> {
-            event.getDispatcher().register(
-                    Commands.literal(MODID)
-                            .then(Commands.literal("resize")
-                                    .then(Commands.argument("width", IntegerArgumentType.integer(1))
-                                            .then(Commands.argument("height", IntegerArgumentType.integer(1))
-                                                    .executes(context -> {
-                                                        ServerPlayer player = context.getSource().getPlayerOrException();
-                                                        InteractionHand hand = CustomCanvasType.isCustomCanvas(player.getMainHandItem()) ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
-                                                        ItemStack itemInHand = player.getItemInHand(hand);
-                                                        if(CustomCanvasType.isCustomCanvas(itemInHand)){
-                                                            int width = IntegerArgumentType.getInteger(context, "width");
-                                                            int height = IntegerArgumentType.getInteger(context, "height");
-                                                            CustomCanvasType.setCustomWidth(itemInHand, width);
-                                                            CustomCanvasType.setCustomHeight(itemInHand, height);
-                                                            context.getSource().sendSuccess(Component.translatable(RESIZE_SUCCESS,
-                                                                            itemInHand.getDisplayName(),
-                                                                            width, height
-                                                                            ),
-                                                                    false);
-                                                            return Command.SINGLE_SUCCESS;
-                                                        } else{
-                                                            throw NOT_HOLDING_CUSTOM_CANVAS.create();
-                                                        }
-                                                    })))));
-        });
+        MinecraftForge.EVENT_BUS.addListener((RegisterCommandsEvent event) -> event.getDispatcher().register(
+                Commands.literal(MODID)
+                        .then(Commands.literal("resize")
+                                .then(Commands.argument("width", IntegerArgumentType.integer(1))
+                                        .then(Commands.argument("height", IntegerArgumentType.integer(1))
+                                                .executes(context -> {
+                                                    ServerPlayer player = context.getSource().getPlayerOrException();
+                                                    InteractionHand hand = CustomCanvasType.isCustomCanvas(player.getMainHandItem()) ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
+                                                    ItemStack itemInHand = player.getItemInHand(hand);
+                                                    if(CustomCanvasType.isCustomCanvas(itemInHand)){
+                                                        int width = IntegerArgumentType.getInteger(context, "width");
+                                                        int height = IntegerArgumentType.getInteger(context, "height");
+                                                        CustomCanvasType.setCustomWidth(itemInHand, width);
+                                                        CustomCanvasType.setCustomHeight(itemInHand, height);
+                                                        context.getSource().sendSuccess(Component.translatable(RESIZE_SUCCESS,
+                                                                        itemInHand.getDisplayName(),
+                                                                        width, height
+                                                                        ),
+                                                                false);
+                                                        return Command.SINGLE_SUCCESS;
+                                                    } else{
+                                                        throw NOT_HOLDING_CUSTOM_CANVAS.create();
+                                                    }
+                                                }))))));
     }
 
     @SubscribeEvent
     public static void onCommonSetup(FMLCommonSetupEvent event) {
+        event.enqueueWork(() -> {
+            NETWORK_HANDLER.registerMessage(packetId++, CustomCanvasUpdatePacket.class, CustomCanvasUpdatePacket::encode, CustomCanvasUpdatePacket::decode, CustomCanvasUpdatePacketHandler::handle);
+            NETWORK_HANDLER.registerMessage(packetId++, CustomCanvasMiniUpdatePacket.class, CustomCanvasMiniUpdatePacket::encode, CustomCanvasMiniUpdatePacket::decode, CustomCanvasMiniUpdatePacketHandler::handle);
+        });
     }
 
     @SubscribeEvent
