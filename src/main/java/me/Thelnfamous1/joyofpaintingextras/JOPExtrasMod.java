@@ -1,6 +1,7 @@
 package me.Thelnfamous1.joyofpaintingextras;
 
 import com.mojang.brigadier.Command;
+import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.logging.LogUtils;
@@ -45,6 +46,7 @@ public class JOPExtrasMod {
     public static final String NOT_HOLDING_CUSTOM_CANVAS_KEY = Util.makeDescriptionId("commands", new ResourceLocation(MODID, "resize/not_holding_custom_canvas"));
     private static final SimpleCommandExceptionType NOT_HOLDING_CUSTOM_CANVAS = new SimpleCommandExceptionType(Component.translatable(NOT_HOLDING_CUSTOM_CANVAS_KEY));
     public static final String RESIZE_SUCCESS = Util.makeDescriptionId("commands", new ResourceLocation(MODID, "resize/success"));
+    public static final String RESCALE_SUCCESS = Util.makeDescriptionId("commands", new ResourceLocation(MODID, "rescale/success"));
 
     private static final String PROTOCOL_VERSION = Integer.toString(1);
     public static final SimpleChannel NETWORK_HANDLER = NetworkRegistry.ChannelBuilder.named(new ResourceLocation(MODID, "main_channel"))
@@ -80,7 +82,26 @@ public class JOPExtrasMod {
                                                     } else{
                                                         throw NOT_HOLDING_CUSTOM_CANVAS.create();
                                                     }
-                                                }))))));
+                                                }))))
+                        .then(Commands.literal("rescale")
+                                .then(Commands.argument("scale", FloatArgumentType.floatArg(0.0F))
+                                        .executes(context -> {
+                                            ServerPlayer player = context.getSource().getPlayerOrException();
+                                            InteractionHand hand = CustomCanvasType.isCustomCanvas(player.getMainHandItem()) ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
+                                            ItemStack itemInHand = player.getItemInHand(hand);
+                                            if(CustomCanvasType.isCustomCanvas(itemInHand)){
+                                                float scale = FloatArgumentType.getFloat(context, "scale");
+                                                CustomCanvasType.setCustomScale(itemInHand, scale);
+                                                context.getSource().sendSuccess(Component.translatable(RESCALE_SUCCESS,
+                                                                itemInHand.getDisplayName(),
+                                                                scale
+                                                        ),
+                                                        false);
+                                                return Command.SINGLE_SUCCESS;
+                                            } else{
+                                                throw NOT_HOLDING_CUSTOM_CANVAS.create();
+                                            }
+                                        })))));
     }
 
     @SubscribeEvent

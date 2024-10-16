@@ -28,12 +28,14 @@ public class EaselCanvasLayerMixin {
             } else {
                 poseStackScale = 3.3F;
             }
-            poseStack.scale(poseStackScale * 16, poseStackScale * 16, poseStackScale * 16);
+            float scale = CustomCanvasType.getCustomScale(stack);
+            float scaleFactor = CustomCanvasType.calculateScaleFactor(scale, customWidth, customHeight);
+            poseStack.scale(poseStackScale * scaleFactor, poseStackScale * scaleFactor, poseStackScale * scaleFactor);
             poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0F));
             poseStack.mulPose(Vector3f.ZP.rotationDegrees(180.0F));
             poseStack.mulPose(Vector3f.XP.rotationDegrees(-15.0F));
             float xShift = -0.75F + ((0.03125F / poseStackScale) * (customWidth));
-            poseStack.translate(xShift, -0.5F - (0.03125F / (poseStackScale * 16) * 32), -0.5F);
+            poseStack.translate(xShift, -0.5F - (0.03125F / (poseStackScale * scaleFactor) * 32), -0.5F);
         }
     }
 }

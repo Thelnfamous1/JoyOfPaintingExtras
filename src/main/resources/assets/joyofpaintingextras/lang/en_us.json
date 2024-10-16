@@ -1,6 +1,8 @@
 {
   "item.joyofpaintingextras.item_canvas_custom": "Custom Canvas",
-  "canvas.custom_dimensions": "Dimensions: %dx%d",
-  "commands.joyofpaintingextras.resize.success": "Resized %s to %dx%d",
+  "canvas.custom_dimensions": "Dimensions: %dx%d pixels",
+  "canvas.custom_scale": "Scale: %d blocks",
+  "commands.joyofpaintingextras.resize.success": "Resized %s to %dx%d pixels",
+  "commands.joyofpaintingextras.rescale.success": "Rescaled %s to %d blocks",
   "commands.joyofpaintingextras.resize.not_holding_custom_canvas": "You must be holding a Custom Canvas"
 }

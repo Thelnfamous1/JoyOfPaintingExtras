@@ -30,14 +30,14 @@ public abstract class ItemCanvasMixin extends ItemMixin{
     @Inject(method = "appendHoverText", at = @At("RETURN"))
     private void post_appendHoverText(ItemStack stack, Level worldIn, List<Component> tooltip, TooltipFlag flagIn, CallbackInfo ci){
         if(this.getCanvasType() == CustomCanvasType.CUSTOM){
-            if(CustomCanvasType.isUnmodifiedCustomCanvas(stack)){
+            if(stack.getTag() != null && CustomCanvasType.isUnmodifiedCustomCanvas(stack)){
                 tooltip.add(Component.translatable("canvas.empty").withStyle(ChatFormatting.GRAY));
             }
             int customWidth = CustomCanvasType.getCustomWidth(stack);
             int customHeight = CustomCanvasType.getCustomHeight(stack);
-            if(customWidth > 0 && customHeight > 0){
-                tooltip.add(Component.translatable("canvas.custom_dimensions", customWidth, customHeight).withStyle(ChatFormatting.GRAY));
-            }
+            tooltip.add(Component.translatable("canvas.custom_dimensions", customWidth, customHeight).withStyle(ChatFormatting.GRAY));
+            float customScale = CustomCanvasType.getCustomScale(stack);
+            tooltip.add(Component.translatable("canvas.custom_scale", ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(customScale)).withStyle(ChatFormatting.GRAY));
         }
     }
 
@@ -46,8 +46,10 @@ public abstract class ItemCanvasMixin extends ItemMixin{
         if((Item) (Object) this == JOPExtrasMod.CUSTOM_CANVAS.get()){
             for(int i = 1; i <= 5; i++){
                 ItemStack itemStack = new ItemStack(JOPExtrasMod.CUSTOM_CANVAS.get());
-                CustomCanvasType.setCustomWidth(itemStack, i * 10);
-                CustomCanvasType.setCustomHeight(itemStack, i * 10);
+                int pixels = 32;
+                CustomCanvasType.setCustomWidth(itemStack, pixels);
+                CustomCanvasType.setCustomHeight(itemStack, pixels);
+                CustomCanvasType.setCustomScale(itemStack, i * 10.0F);
                 pItems.add(itemStack);
             }
             return true;
