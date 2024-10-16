@@ -22,21 +22,18 @@ public class EaselCanvasLayerMixin {
         if(itemCanvas.getCanvasType() == CustomCanvasType.CUSTOM){
             int customWidth = CustomCanvasType.getCustomWidth(stack);
             int customHeight = CustomCanvasType.getCustomHeight(stack);
-            boolean small;
             float poseStackScale;
             if ((customWidth / 16.0F) <= 1.0F && (customHeight / 16.0F) <= 1.0F) {
                 poseStackScale = 2.0F;
-                small = true;
             } else {
                 poseStackScale = 3.3F;
-                small = false;
             }
             poseStack.scale(poseStackScale, poseStackScale, poseStackScale);
             poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0F));
             poseStack.mulPose(Vector3f.ZP.rotationDegrees(180.0F));
             poseStack.mulPose(Vector3f.XP.rotationDegrees(-15.0F));
             float xShift = -0.75F + ((0.03125F / poseStackScale) * (customWidth));
-            poseStack.translate(xShift, small ? -1.0F : -0.8125F, -0.5F);
+            poseStack.translate(xShift, -0.5F - (0.03125F / poseStackScale * 32), -0.5F);
         }
     }
 }
